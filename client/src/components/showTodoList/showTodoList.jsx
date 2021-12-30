@@ -4,13 +4,12 @@ import axios from "axios";
 
 
 import './showTodoList.scss';
-import { UpdateTodo } from "../updateTodo"; // added
+// import { UpdateTodo } from "../updateTodo"; // added
 
 
-function TodoCard({data, handleDelete, handleChange, handleEdit }) {
-    const { _id, title, done } = data; //props
+function TodoCard({data, handleDelete }) {
+    const { _id, done } = data; //props
     const [todo, setData] = useState(data); //state
-    
     
     
     let classDone, classCheck, classActive;
@@ -20,61 +19,63 @@ function TodoCard({data, handleDelete, handleChange, handleEdit }) {
         setData({ ...data, title: e.target.value});
     }
 
+
+    // function handleSubmit(e) {
+    //     e.preventDefault();
+    //     axios
+    //         .put(`http://localhost:8000/api/todo/${_id}`, {title: todo.title} )       
+    //         .then((res) => {
+    //             setData({ ...res});
+    //             console.log(res.data.message);
+    //         })
+    //         .catch((err) => {
+    //             console.log("Failed to update todo");
+    //             console.log(err.message);
+    //     });
+    // }
+
     function handleSubmit(e) {
-        console.log("data +++", data.title);
-        e.preventDefault(); 
-        console.log({ _id }, { data } + `id, data`);
+        e.preventDefault();
         axios
-            .put(`http://localhost:8000/api/todo/${_id}`, data)
+            .put(`http://localhost:8000/api/todo/${_id}`, {title: todo.title} )       
             .then((res) => {
-                setData({ ...data, title: e.target.value});
+                setData({ ...res});
                 console.log(res.data.message);
             })
             .catch((err) => {
                 console.log("Failed to update todo");
                 console.log(err.message);
-            });
+        });
     }
 
-    // function inputChange(e) {
-    //     console.log(title)
-    //     this.setState({title: e.target.value}.replace (/ +/g, ' '))
+
+    // function handleDelete(e) { // added
+    //     axios.delete(`http://localhost:8000/api/todo/${e.target.name}`);
+    //     setTodo((data) => {
+    //         return data.filter((todo) => todo._id !== e.target.name);
+    //     });
     // }
 
-    // function onFocus(e) {
-    //     e.currentTarget.classList.add("to-do__text-active")
-    // }
+    function onFocus(e) {
+        e.currentTarget.classList.add("to-do__text-active")
+    }
 
-    // function onBlur(e) {
-    //     e.currentTarget.classList.remove("to-do__text-active"); 
-    //     this.setState({ 
-    //         title: this.props.title      
-    //     })      
-    // }
+    function onBlur(e) {
+        e.currentTarget.classList.remove("to-do__text-active");     
+    }
 
-    // function handleKeyDown(e){
-    //     if(e.keyCode === 13){
-    //         e.preventDefault();
-    //         e.currentTarget.setAttribute("readonly", "true")
-    //         e.currentTarget.classList.remove("to-do__text-active");
-    //         this.props.updateData(
-    //             this.state.id,
-    //             this.state.title,
-    //             console.log(this.state.title + ` AAAAAAA`)
-    //         );
-    //         if(!this.state.title.length) {
-    //             this.setState({ 
-    //                 title: this.props.title      
-    //             })
-    //         } 
-    //     }        
-    // }
+    function handleKeyDown(e){
+        if(e.keyCode === 13){
+            e.currentTarget.setAttribute("readonly", "true")
+            e.currentTarget.classList.remove("to-do__text-active");
+        }        
+    }
 
 
-    // function removeAttribute(e) {
-    //     e.currentTarget.classList.add("to-do__text-active");
-    //     e.currentTarget.removeAttribute("readonly", "true")
-    // }
+    function removeAttribute(e) {
+        e.currentTarget.classList.add("to-do__text-active");
+        e.currentTarget.removeAttribute("readonly", "true")
+    }
 
     
       
@@ -96,19 +97,20 @@ function TodoCard({data, handleDelete, handleChange, handleEdit }) {
                 type="checkbox"
             />
             <img className={classActive} src="/img/check.svg" alt="check" />
+            <form action="" onSubmit={handleSubmit}>
             <input className={classDone}
                 type="text"
-                onDoubleClick={handleSubmit}
-                // onClick={handleUpdate}
                 onChange={handleChange}
-                // onKeyDown={handleKeyDown}
-                // onFocus={onFocus}
-                // onBlur={onBlur}
+                onClick={removeAttribute}
+                onKeyDown={handleKeyDown}
+                onFocus={onFocus}
+                onBlur={onBlur}
                 done={done}
                 value={todo.title}
                 name={_id}
                 id={_id}  
             />   
+            </form>
             <button className="to-do__checkbox-btn">
                 <img className="to-do__checkbox-cross"
                 done={done} 
@@ -123,17 +125,9 @@ function TodoCard({data, handleDelete, handleChange, handleEdit }) {
 
 export function ShowTodoList() {
     const [todo, setTodo] = useState([]);
-    const [open, setOpen] = useState(false); // added
-    const [id, setId] = useState(""); // added
-    const [update, setUpdate] = useState(false); // added
-    // const [data, setData] = useState({});
-
-
-    // function handleChange(e) {
-    //     console.log("data", data);
-    //     // console.log(e.target.value)
-    //     setData({ id: 1, done: false, title: e.target.value});
-    // }
+    // const [open, setOpen] = useState(false); // added
+    // const [id, setId] = useState(""); // added
+    // const [update] = useState(true); // added
 
 
     useEffect(() => {
@@ -146,65 +140,39 @@ export function ShowTodoList() {
             .catch((err) => {
                 console.log(err);
             });
-    }, [update]);
+    }, []);
 
 
-    function handleEdit(e) { // added
-        setId(e.target.name); 
-        setOpen(true);
-    }
+    // function handleEdit(e) { // added
+    //     setId(e.target.name); 
+    //     setOpen(true);
+    // }
 
-    function handleUpdate() { // added
-        console.log("update:", update, !update);
-        setUpdate(!update);
-    }
+    // function handleUpdate() { // added
+    //     console.log("update:", update, !update);
+    //     setUpdate(!update);
+    // }
 
     function handleDelete(e) { // added
         axios.delete(`http://localhost:8000/api/todo/${e.target.name}`);
-
         setTodo((data) => {
             return data.filter((todo) => todo._id !== e.target.name);
         });
     }
 
-    function handleClose() { // added
-        setId("");
-        setOpen(false);
-    }
     
 
     return (
-        <section className="container">
-            <section className="contents">
+        <section className="contents">
                 <ul className="list-container">
                     {todo.map((data) => (
                         <TodoCard 
                             data={data}
-                            handleEdit={handleEdit}
+                            // handleEdit={handleEdit}
                             handleDelete={handleDelete}
-                            // handleChange={handleChange}
                         />   
                     ))}
                 </ul>
-            </section>
-            {open ? (
-                <section className="update-container">
-                    <div className="update-contents">
-                        <p onClick={handleClose} className="close">
-                            &times;
-                        </p>
-                        <UpdateTodo
-                            _id={id}
-                            handleClose={handleClose}
-                            handleUpdate={handleUpdate}
-                            handleEdit={handleEdit}
-                        />
-                    </div>
-                </section>
-            ) : (
-                ""
-            )}
         </section>
-        
     );
 }
