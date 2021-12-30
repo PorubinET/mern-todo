@@ -10,35 +10,23 @@ import './showTodoList.scss';
 function TodoCard({data, handleDelete }) {
     const { _id, done } = data; //props
     const [todo, setData] = useState(data); //state
-    
+    // console.log(todo)
+    // console.log(todo)
     
     let classDone, classCheck, classActive;
 
     function handleChange(e) {
-        console.log("e.target.value", e.target.value)
         setData({ ...data, title: e.target.value});
     }
 
-
-    // function handleSubmit(e) {
-    //     e.preventDefault();
-    //     axios
-    //         .put(`http://localhost:8000/api/todo/${_id}`, {title: todo.title} )       
-    //         .then((res) => {
-    //             setData({ ...res});
-    //             console.log(res.data.message);
-    //         })
-    //         .catch((err) => {
-    //             console.log("Failed to update todo");
-    //             console.log(err.message);
-    //     });
-    // }
+    
 
     function handleSubmit(e) {
         e.preventDefault();
         axios
             .put(`http://localhost:8000/api/todo/${_id}`, {title: todo.title} )       
             .then((res) => {
+                console.log("res", res);
                 setData({ ...res});
                 console.log(res.data.message);
             })
@@ -47,14 +35,6 @@ function TodoCard({data, handleDelete }) {
                 console.log(err.message);
         });
     }
-
-
-    // function handleDelete(e) { // added
-    //     axios.delete(`http://localhost:8000/api/todo/${e.target.name}`);
-    //     setTodo((data) => {
-    //         return data.filter((todo) => todo._id !== e.target.name);
-    //     });
-    // }
 
     function onFocus(e) {
         e.currentTarget.classList.add("to-do__text-active")
@@ -71,14 +51,55 @@ function TodoCard({data, handleDelete }) {
         }        
     }
 
-
     function removeAttribute(e) {
         e.currentTarget.classList.add("to-do__text-active");
         e.currentTarget.removeAttribute("readonly", "true")
     }
-
     
-      
+
+    function doneTasks(_id) {
+        axios      
+        .put(`http://localhost:8000/api/todo/${_id}`, {done:  !done} )       
+        .then((res) => {
+            console.log("res data", res.data);
+            res.data.map(item => {
+                if (item.id === _id) 
+                    setData({...todo, done: !done})
+                console.log(todo)
+            })
+        })
+        .catch((err) => {
+            console.log("Failed to update todo");
+            console.log(err.message);
+        });
+    }
+
+    // doneTasks = (id) => {
+    //     this.setState(({data}) => ({
+    //       data: data.map(item => {
+    //         if (item.id === id) 
+    //           return {...item, done: !item.done}
+    //         return item;
+    //       })
+    //     }))
+    // }
+
+    // function handleSubmit(e) {
+    //     e.preventDefault();
+    //     axios
+    //         .put(`http://localhost:8000/api/todo/${_id}`, {title: todo.title} )       
+    //         .then((res) => {
+    //             setData({ ...res});
+    //             console.log(res.data.message);
+    //         })
+    //         .catch((err) => {
+    //             console.log("Failed to update todo");
+    //             console.log(err.message);
+    //     });
+    // }
+    
+    
+
     if(done){
       classDone = "to-do__text to-do__done";
       classCheck = "to-do__checkbox to-do__checkbox-actve";
@@ -92,7 +113,9 @@ function TodoCard({data, handleDelete }) {
     return (
         <li className="to-do__list-li" key={_id} >
             <label className={classCheck} htmlFor="checkItem"></label>
-            <input id="checkItem"
+            <input 
+                id={_id}
+                onClick={() => doneTasks(_id)}
                 className="to-do__checkbox-input" 
                 type="checkbox"
             />
@@ -105,17 +128,14 @@ function TodoCard({data, handleDelete }) {
                 onKeyDown={handleKeyDown}
                 onFocus={onFocus}
                 onBlur={onBlur}
-                done={done}
                 value={todo.title}
-                name={_id}
-                id={_id}  
-            />   
+                // key={_id}
+                // id={_id}  
+            />
             </form>
             <button className="to-do__checkbox-btn">
                 <img className="to-do__checkbox-cross"
-                done={done} 
-                name={_id} 
-                id={_id}  
+                id={_id} 
                 onClick={handleDelete} 
                 src="/img/cross.svg" alt="delete"/>
             </button>
@@ -124,23 +144,24 @@ function TodoCard({data, handleDelete }) {
 }
 
 export function ShowTodoList() {
-    const [todo, setTodo] = useState([]);
     // const [open, setOpen] = useState(false); // added
     // const [id, setId] = useState(""); // added
     // const [update] = useState(true); // added
+    const [todo, setTodo] = useState([]);
+    let length = todo.length;
 
 
     useEffect(() => {
         axios
             .get("http://localhost:8000/api/todo")
             .then((res) => {
-                console.log(res.data);
+                // console.log(res.data);
                 setTodo(res.data);
             })
             .catch((err) => {
                 console.log(err);
             });
-    }, []);
+    }, [length]);
 
 
     // function handleEdit(e) { // added
@@ -154,9 +175,9 @@ export function ShowTodoList() {
     // }
 
     function handleDelete(e) { // added
-        axios.delete(`http://localhost:8000/api/todo/${e.target.name}`);
+        axios.delete(`http://localhost:8000/api/todo/${e.target.id}`);
         setTodo((data) => {
-            return data.filter((todo) => todo._id !== e.target.name);
+            return data.filter((todo) => todo._id !== e.target.id);
         });
     }
 
@@ -166,10 +187,11 @@ export function ShowTodoList() {
         <section className="contents">
                 <ul className="list-container">
                     {todo.map((data) => (
-                        <TodoCard 
+                        <TodoCard
                             data={data}
                             // handleEdit={handleEdit}
                             handleDelete={handleDelete}
+                            key={data._id}
                         />   
                     ))}
                 </ul>
